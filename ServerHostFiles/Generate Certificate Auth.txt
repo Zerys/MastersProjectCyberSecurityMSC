@@ -1,0 +1,37 @@
+openssl req -x509 -newkey rsa:2048 -out AppCA.cer -outform PEM -keyout AppCA.pvk -days 10000
+ -verbose -config DistinguishedName.cnf -nodes -sha256 -subj "/CN=192.168.0.12"
+openssl req -newkey rsa:2048 -keyout AppCert.pvk -out AppCertReq.req -subj /CN=192.168.0.12 -sha256 -nodes
+openssl x509 -req -CA AppCA.cer -CAkey AppCA.pvk -in AppCertReq.req
+ -out AppCert.cer -days 10000 -extfile AltNames.ext -sha256 -set_serial 0x1111
+
+AltNames.ext
+subjectAltName = @alt_names
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+
+[alt_names]
+IP.1        = 192.168.0.12
+IP.2        = 5.65.166.98
+IP.3        = *.192.168.0.12
+
+DistinguishedName.cnf
+[ req ]
+distinguished_name  = req_distinguished_name
+x509_extensions     = root_ca
+
+[ req_distinguished_name ]
+countryName             = Country Name (2 letter code)
+countryName_min         = 2
+countryName_max         = 2
+stateOrProvinceName     = State or Province Name (full name)
+localityName            = Locality Name (eg, city)
+organizationName      = Organization Name (eg, company)
+organizationalUnitName  = Organizational Unit Name (eg, section)
+commonName              = Common Name (eg, fully qualified host name)
+commonName_max          = 64
+emailAddress            = Email Address
+emailAddress_max        = 64
+
+[ root_ca ]
+basicConstraints            = critical, CA:true
+subjectAltName          	= IP:192.168.0.12
